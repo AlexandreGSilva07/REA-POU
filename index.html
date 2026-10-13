@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#080f20">
+  <meta name="description" content="REA-POU: ambiente de testes do jogo web independente">
+  <title>REA-POU — Sandbox Web Mobile</title>
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+  <main class="app">
+    <div class="game-frame" aria-label="Área do jogo">
+      <canvas id="game" width="360" height="640" aria-label="Cena de teste do jogo"></canvas>
+      <div class="top-bar">
+        <div class="project-name">REA<span>POU</span></div>
+        <div class="stage">SANDBOX · 001</div>
+      </div>
+      <div class="notice">
+        <span class="notice-dot"></span>
+        Cena original de teste — aguardando análise do APK
+      </div>
+      <div class="bottom-controls">
+        <div class="joystick" id="joystick" role="application" aria-label="Controle de movimento">
+          <div class="joystick-knob" id="joystick-knob"></div>
+        </div>
+        <div class="action-column">
+          <button id="reset" class="action-button" type="button" aria-label="Reiniciar posição">↺</button>
+          <span>RESET</span>
+        </div>
+      </div>
+      <div class="footer-bar">WEBGL/CANVAS · MOBILE FIRST · CLEAN ROOM</div>
+    </div>
+    <p class="desktop-note">Protótipo independente de infraestrutura. Toque no controle para mover o personagem.</p>
+  </main>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
