@@ -1,41 +1,47 @@
-# TRACKSHIFT — City Runner
+# TRACKSHIFT 3D — Visual experiment
 
-**Jogo de corrida infinita mobile para navegador, implementado de forma independente.** Inspirado no gênero popularizado por jogos como Subway Surfers. Não é uma distribuição do Subway Surfers, nem uma execução/port do APK oficial: é um jogo **original** com mecânicas semelhantes e recursos próprios.
+**Status:** independent 3D WebGL prototype. Not a copy of Subway Surfers. No original game assets included.
 
-## Jogar
+## Goal
 
-Abra `TRACKSHIFT-mobile.html` no navegador ou hospede a pasta em servidor estático (`python3 -m http.server 8765`). **Não é necessária conta, biblioteca externa ou Supabase para jogar**. O progresso fica armazenado no navegador em `localStorage` quando disponível.
+Validate a real 3D mobile browser scene with a third-person moving runner, authored 3D train meshes, rails, buildings, jumping, rolling, collectible coins, obstacle collision and endless-run persistence.
 
-## Funcionalidades da versão 0.1
+## Run locally
 
-- Cenário urbano renderizado em Canvas 2D com projeção de perspectiva e trilhos em três faixas (2,5D).
-- Controles por gesto (esquerda/direita/cima/baixo), botões de tela, setas do teclado e WASD.
-- Trens, barricadas, cones e arcos; salto, rolamento e colisões.
-- Pistas e moedas geradas proceduralmente, aumento gradual de velocidade e pontuação.
-- Pranchas protetoras, escudo e imãs; cinco trajes originais.
-- Garagem/loja, missões, recorde, resumo de partida e salvamento local.
-- Áudio sintetizado localmente via Web Audio; pausa e retomada.
-
-## Testes
-
-```bash
-npm test
-python3 tests/browser_deep.py
+```sh
+python3 -m http.server 8080
 ```
 
-A rotina Chromium usa `playwright` e `/usr/bin/chromium` quando presentes. Por restrição da navegação local no navegador de teste, ela injeta os arquivos no contexto de página e utiliza um armazenamento simulado para validar a persistência da lógica. A hospedagem pública precisa de sua própria verificação externa.
+Open `http://localhost:8080` with a WebGL-capable browser. The prototype has no CDN, `npm install`, network API, or remote asset dependencies. An optional Google Fonts `@import` affects only typography; standard system fonts are used if offline.
 
-## Estrutura
+## Controls
 
-- `index.html` — ponto de entrada web
-- `src/engine.js` — simulação de pistas, saltos, obstáculos, moedas e pontuação
-- `src/render.js` — renderer original em perspectiva no Canvas
-- `src/main.js` — interface, gestos, loja, salvamento e audio
-- `src/style.css` — interface mobile e layouts
-- `tests/` — testes Node e Playwright
-- `docs/APK_INSPECTION.md` — inventário privado e limites da análise
-- `TRACKSHIFT-mobile.html` — arquivo único portátil
+- Swipe left/right to switch among 3 lanes.
+- Swipe up to jump. Swipe down to roll.
+- Tap the board power-up at bottom left.
+- Keyboard: arrows/WASD, space, B.
 
-## Compromisso de independência
+## Architecture
 
-Os arquivos compilados originais, músicas, texturas, personagens e marcas do APK não foram colocados no projeto. Não execute este arquivo como APK Android; a implementação é feita inteiramente para a Web. O trabalho ainda não foi validado por comparação dinâmica completa com o jogo Android original.
+- `src/engine.js` — proven independent gameplay simulation, kept from the original TRACKSHIFT branch.
+- `src/webgl.js` — custom WebGL camera, mesh builder, shaders and a Canvas2D 3D-mesh fallback for WebGL-less devices.
+- `src/scene.js` — meshes authored for urban surroundings, trains, player, track and obstacles; articulated animation.
+- `src/main.js` — inputs, score HUD, modal screens and saves.
+- `src/ui.css` — responsive portrait UI and environmental overlay.
+
+## Verification
+
+- 14 game engine unit tests pass.
+- 11 browser interaction checks passed using a **real GPU WebGL context**, running Chromium via virtual X11 with SwiftShader.
+- Actual captures `previews/menu-webgl.png` and `previews/game-webgl.png` were rendered by the prototype, not sourced from the original game or image search.
+- Further artistic work and a real Android hardware test remain necessary. The artwork is procedural and does **not** achieve the quality of the proprietary Unity assets.
+
+## Source APK research
+
+The supplied Subway Surfers 3.70.2 APK was inspected privately. It contains Unity with IL2CPP and a Unity Addressables catalogue. Its bundles include game-specific assets, but this prototype does not contain or load models/textures extracted from the APK. Extracting and converting Unity materials/models requires a separately authorized private pipeline and a license assessment before redistribution. Do not commit proprietary game files into this public repository.
+
+## Branch policy
+
+- `main` — REA-POU, leave unchanged.
+- `reverse/next-game` — earlier TRACKSHIFT 2.5D.
+- `experiment/trackshift-webgl-3d` — this experimental 3D prototype, independently staged.

@@ -1,11 +1,9 @@
 node_modules/
 *.apk
 *.aab
-*.so
-*.dex
 *.bundle
 *.assets
-.venv/
-__pycache__/
-playwright-report/
-test-results/
+*.resS
+original-assets/
+private-analysis/
+.DS_Store
