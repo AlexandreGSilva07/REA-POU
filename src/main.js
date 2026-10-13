@@ -1,89 +1,41 @@
-import { WORLD, advance, clamp, createState } from "./engine.js";
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const pad = document.getElementById("joystick");
-const knob = document.getElementById("joystick-knob");
-const reset = document.getElementById("reset");
-let state = createState();
-const stick = { x: 0, y: 0 };
-const held = new Set();
-let pointerId = null;
-
-function setStick(clientX, clientY) {
-  const rect = pad.getBoundingClientRect();
-  const x = clientX - rect.left - rect.width / 2;
-  const y = clientY - rect.top - rect.height / 2;
-  const radius = rect.width * 0.28;
-  const distance = Math.hypot(x, y) || 1;
-  const scale = Math.min(distance, radius) / distance;
-  const nx = x * scale;
-  const ny = y * scale;
-  stick.x = nx / radius;
-  stick.y = ny / radius;
-  knob.style.transform = "translate(" + nx + "px," + ny + "px)";
-}
-function releaseStick() {
-  pointerId = null;
-  stick.x = 0; stick.y = 0;
-  knob.style.transform = "translate(0,0)";
-}
-pad.addEventListener("pointerdown", e => {
-  if (pointerId !== null) return;
-  pointerId = e.pointerId;
-  pad.setPointerCapture(e.pointerId);
-  setStick(e.clientX, e.clientY);
-});
-pad.addEventListener("pointermove", e => {
-  if (e.pointerId === pointerId) setStick(e.clientX, e.clientY);
-});
-pad.addEventListener("pointerup", e => { if (e.pointerId === pointerId) releaseStick(); });
-pad.addEventListener("pointercancel", e => { if (e.pointerId === pointerId) releaseStick(); });
-window.addEventListener("blur", () => { held.clear(); releaseStick(); });
-window.addEventListener("keydown", e => {
-  const key = e.key.toLowerCase();
-  if (["arrowup","arrowdown","arrowleft","arrowright","w","a","s","d"].includes(key)) {
-    held.add(key); e.preventDefault();
-  }
-});
-window.addEventListener("keyup", e => held.delete(e.key.toLowerCase()));
-reset.addEventListener("click", () => { state = createState(); });
-
-function getInput() {
-  const x = stick.x + Number(held.has("d") || held.has("arrowright")) - Number(held.has("a") || held.has("arrowleft"));
-  const y = stick.y + Number(held.has("s") || held.has("arrowdown")) - Number(held.has("w") || held.has("arrowup"));
-  return { x: clamp(x, -1, 1), y: clamp(y, -1, 1) };
-}
-
-function draw() {
-  const { width: w, height: h } = WORLD;
-  const bg = ctx.createLinearGradient(0, 0, 0, h);
-  bg.addColorStop(0, "#101f3b"); bg.addColorStop(1, "#1c3750");
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = "#39618148"; ctx.lineWidth = 1;
-  for (let x = 0; x <= w; x += 36) { ctx.beginPath(); ctx.moveTo(x, 105); ctx.lineTo(x, h); ctx.stroke(); }
-  for (let y = 105; y <= h; y += 36) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-  ctx.strokeStyle = "#7fd4d133"; ctx.lineWidth = 2;
-  for (let r = 45; r <= 155; r += 55) {
-    ctx.beginPath(); ctx.arc(w/2, h/2 + 25, r, 0, Math.PI*2); ctx.stroke();
-  }
-  ctx.fillStyle = "#9ac2dc";
-  ctx.font = "11px system-ui"; ctx.textAlign = "center";
-  ctx.fillText("AMBIENTE DE MOVIMENTAÇÃO", w / 2, 156);
-  ctx.fillStyle = "#06112470";
-  ctx.beginPath(); ctx.ellipse(state.x, state.y + 16, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
-  const orb = ctx.createRadialGradient(state.x - 8, state.y - 10, 2, state.x, state.y, WORLD.radius + 4);
-  orb.addColorStop(0, "#e7fbff"); orb.addColorStop(0.38, "#89dfe8"); orb.addColorStop(1, "#338ca1");
-  ctx.fillStyle = orb; ctx.beginPath(); ctx.arc(state.x, state.y, WORLD.radius, 0, Math.PI*2); ctx.fill();
-  ctx.strokeStyle = "#c7f6ff"; ctx.lineWidth = 2; ctx.stroke();
-}
-
-let previous = 0;
-function frame(now) {
-  const seconds = previous ? (now - previous) / 1000 : 0;
-  previous = now;
-  state = advance(state, getInput(), seconds);
-  draw();
-  requestAnimationFrame(frame);
-}
-requestAnimationFrame(frame);
+(function(){
+'use strict';
+const E=window.MetroEngine, R=window.MetroRender;const $=id=>document.getElementById(id);
+const stored=(()=>{try{const d=JSON.parse(localStorage.getItem('trackshift-save-v1')||'{}');return {wallet:Math.max(0,d.wallet|0),best:Math.max(0,d.best|0),skin:E.CATALOG.some(s=>s.id===d.skin)?d.skin:'ember',owned:Array.isArray(d.owned)?d.owned:['ember'],boards:Math.max(0,d.boards??1),magnets:Math.max(0,d.magnets??0),lifetime:d.lifetime||{distance:0,coins:0,runs:0},claimed:Array.isArray(d.claimed)?d.claimed:[]};}catch{return {wallet:0,best:0,skin:'ember',owned:['ember'],boards:1,magnets:0,lifetime:{distance:0,coins:0,runs:0},claimed:[]}}})();
+const S=E.init(Math.floor(Date.now()%2000000000));S.skin=stored.skin;S.powerups.board=stored.boards;S.mute=false;const screens=['menuScreen','garageScreen','helpScreen','pauseScreen','overScreen'];let toastTimer=0,finished=false,last=0,queuedMagnets=stored.magnets;let ctxAudio=null;
+function save(){try{localStorage.setItem('trackshift-save-v1',JSON.stringify(stored));}catch{}}
+function sound(type){if(S.mute)return;try{const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)return;ctxAudio=ctxAudio||new Audio();const o=ctxAudio.createOscillator(),gain=ctxAudio.createGain(),now=ctxAudio.currentTime;let hz={coin:920,lane:460,jump:540,slide:260,crash:132,saved:410,power:800,dodge:670,land:260,board:660}[type]||480;o.type=type==='crash'?'sawtooth':'sine';o.frequency.setValueAtTime(hz,now);o.frequency.exponentialRampToValueAtTime(Math.max(60,hz*.7),now+.1);gain.gain.setValueAtTime(.045,now);gain.gain.exponentialRampToValueAtTime(.0001,now+.12);o.connect(gain).connect(ctxAudio.destination);o.start(now);o.stop(now+.13);}catch{}}
+function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1400)}
+function show(name){for(const id of screens)$(id).classList.toggle('hidden',id!==name);$('hud').classList.toggle('hidden',S.mode!=='run'&&S.mode!=='paused');$('controls').classList.toggle('hidden',S.mode!=='run');}
+function redrawHeader(){ $('bestMain').textContent=stored.best.toLocaleString('pt-BR');$('walletMain').textContent=stored.wallet.toLocaleString('pt-BR');$('walletGarage').textContent=stored.wallet.toLocaleString('pt-BR');$('boardCount').textContent=S.powerups.board;$('magnetCount').textContent=queuedMagnets;$('magnetBtn').classList.toggle('hidden',queuedMagnets<=0);}
+function menu(){S.mode='menu';S.skin=stored.skin;S.powerups.board=stored.boards;finished=false;redrawHeader();show('menuScreen')}
+function begin(){S.skin=stored.skin;E.reset(S);S.powerups.board=stored.boards;queuedMagnets=stored.magnets;S.magnetTime=0;finished=false;show(null);toast('DESVIE DOS TRENS!');}
+function endRun(){if(finished)return;finished=true;const result=E.bonusEnd(S);const prior=stored.best;stored.best=Math.max(stored.best,S.score);stored.wallet+=S.runCoins;stored.lifetime.distance+=Math.floor(S.meters);stored.lifetime.coins+=S.runCoins;stored.lifetime.runs++;stored.boards=S.powerups.board;stored.magnets=queuedMagnets;save();$('resultScore').textContent=S.score.toLocaleString('pt-BR');$('resultMeters').textContent=Math.floor(S.meters)+'m';$('resultCoins').textContent='+'+S.runCoins;$('resultDodges').textContent=S.stats.dodges;$('newRecord').classList.toggle('hidden',S.score<=prior);show('overScreen');}
+function action(kind){if(S.mode!=='run')return;let result=E.input(S,kind);if(result&&kind==='board'){stored.boards=S.powerups.board;save();$('boardCount').textContent=S.powerups.board;$('magnetCount').textContent=queuedMagnets;$('magnetBtn').classList.toggle('hidden',queuedMagnets<=0);toast('PRANCHA ATIVADA!');sound('board')}else if(result)sound(kind==='roll'?'slide':kind);}
+function pause(){if(S.mode!=='run')return;S.mode='paused';show('pauseScreen')}
+function resume(){if(S.mode!=='paused')return;S.mode='run';last=performance.now();show(null)}
+function skins(){const list=$('skinList');list.innerHTML=E.CATALOG.map(c=>{const owned=stored.owned.includes(c.id),selected=stored.skin===c.id;return `<div class="skin-card ${selected?'selected':''}"><div class="skin-preview" style="--outfit:${c.jacket};--hat:${c.hat}"><div class="tiny-person"></div></div><b>${c.name}</b><small>${c.cost===0?'INICIAL':'★ '+c.cost}</small><button data-skin="${c.id}" ${selected?'disabled':''}>${selected?'✓ EQUIPADO':owned?'EQUIPAR':'COMPRAR'}</button></div>`}).join('');}
+function renderMissions(){const m=stored.lifetime;const missions=[{id:'distance',label:'🏃 Corra 2.000 metros',done:Math.floor(m.distance||0),target:2000,prize:350},{id:'coins',label:'★ Colete 200 moedas',done:m.coins||0,target:200,prize:200},{id:'runs',label:'🎯 Complete 10 corridas',done:m.runs||0,target:10,prize:250}];$('missionCards').innerHTML=missions.map(m=>`<div><span>${m.label}<br><small>${Math.min(m.target,m.done)}/${m.target}</small></span>${stored.claimed.includes(m.id)?'<b>✓ CONCLUÍDA</b>':m.done>=m.target?`<button class="claim" data-claim="${m.id}">RESGATAR ★ ${m.prize}</button>`:`<b>${Math.floor(m.done/m.target*100)}%</b>`}</div>`).join('');}
+function garage(){S.mode='garage';redrawHeader();skins();renderMissions();show('garageScreen')}
+function buy(id){const c=E.CATALOG.find(x=>x.id===id);if(!c)return;if(!stored.owned.includes(id)){if(stored.wallet<c.cost){toast('MOEDAS INSUFICIENTES');return;}stored.wallet-=c.cost;stored.owned.push(id);toast('NOVO TRAJE DESBLOQUEADO!');}stored.skin=id;S.skin=id;save();redrawHeader();skins();}
+function purchasePower(which){let price=which==='board'?120:95;if(stored.wallet<price){toast('PRECISA DE MAIS MOEDAS');return;}stored.wallet-=price;if(which==='board'){stored.boards++;S.powerups.board=stored.boards}else{stored.magnets++;queuedMagnets=stored.magnets}save();redrawHeader();toast(which==='board'?'PRANCHA ADQUIRIDA!':'ÍMÃ ADQUIRIDO!');}
+function useMagnet(){if(S.mode!=='run'||queuedMagnets<=0)return;queuedMagnets--;stored.magnets=queuedMagnets;save();redrawHeader();S.magnetTime=9;toast('ÍMÃ ATIVO!');sound('power')}
+$('startBtn').addEventListener('click',begin);$('garageBtn').addEventListener('click',garage);$('helpBtn').addEventListener('click',()=>{S.mode='help';show('helpScreen')});$('pauseBtn').addEventListener('click',pause);$('resumeBtn').addEventListener('click',resume);$('retryBtn').addEventListener('click',begin);$('endHomeBtn').addEventListener('click',menu);$('pauseHomeBtn').addEventListener('click',menu);$('soundBtn').addEventListener('click',()=>{S.mute=!S.mute;$('soundBtn').textContent=S.mute?'♪̸':'♫';toast(S.mute?'ÁUDIO DESLIGADO':'ÁUDIO LIGADO')});
+for(const b of document.querySelectorAll('[data-go="menu"]'))b.addEventListener('click',menu);
+$('skinList').addEventListener('click',e=>{let target=e.target.closest('[data-skin]');if(target)buy(target.dataset.skin)});
+$('missionCards').addEventListener('click',e=>{const b=e.target.closest('[data-claim]');if(!b||stored.claimed.includes(b.dataset.claim))return;const rewards={distance:350,coins:200,runs:250};stored.wallet+=rewards[b.dataset.claim]||0;stored.claimed.push(b.dataset.claim);save();renderMissions();redrawHeader();toast('RECOMPENSA RESGATADA!')});
+$('buyBoard').addEventListener('click',()=>purchasePower('board'));$('buyMagnet').addEventListener('click',()=>purchasePower('magnet'));
+for(const b of document.querySelectorAll('[data-action]')){b.addEventListener('pointerdown',e=>{e.preventDefault();action(b.dataset.action)})}
+$('boardBtn').addEventListener('click',()=>action('board'));$('magnetBtn').addEventListener('click',useMagnet);
+// Gesture support anywhere in the playing field (including visual backdrop).
+let beginGesture=null;const frame=$('frame');frame.addEventListener('pointerdown',e=>{if(S.mode!=='run'||e.target.closest('button'))return;beginGesture={x:e.clientX,y:e.clientY,id:e.pointerId};});
+frame.addEventListener('pointerup',e=>{if(!beginGesture||e.pointerId!==beginGesture.id)return;const x=e.clientX-beginGesture.x,y=e.clientY-beginGesture.y;beginGesture=null;if(Math.max(Math.abs(x),Math.abs(y))<26)return;if(Math.abs(x)>Math.abs(y))action(x>0?'right':'left');else action(y<0?'jump':'roll')});frame.addEventListener('pointercancel',()=>{beginGesture=null});
+window.addEventListener('keydown',e=>{const key=e.key.toLowerCase(),codes={'arrowleft':'left','a':'left','arrowright':'right','d':'right','arrowup':'jump','w':'jump',' ':'jump','arrowdown':'roll','s':'roll','b':'board'};if(codes[key]){e.preventDefault();if(!e.repeat)action(codes[key]);}if(key==='escape'){if(S.mode==='run')pause();else if(S.mode==='paused')resume();}if(key==='enter'){if(S.mode==='menu'||S.mode==='over')begin();}});
+// Touch guard: prevent scroll while still permitting modal panel scroll.
+window.addEventListener('touchmove',e=>{if(S.mode==='run'&&e.target.closest('#frame'))e.preventDefault()},{passive:false});
+function hud(){if(S.mode!=='run'&&S.mode!=='paused')return;$('score').textContent=S.score.toLocaleString('pt-BR');$('meters').textContent=Math.floor(S.meters)+'m';$('runCoins').textContent=S.runCoins;$('boardCount').textContent=S.powerups.board;$('magnetCount').textContent=queuedMagnets;$('magnetBtn').classList.toggle('hidden',queuedMagnets<=0);$('shieldTag').classList.toggle('hidden',S.shields<=0);$('magnetTag').classList.toggle('hidden',S.magnetTime<=0);$('boardTag').classList.toggle('hidden',S.boardTime<=0);}
+let previousCoin=0;
+function loop(now){const dt=Math.min(.035,Math.max(0,(now-last)/1000||0));last=now;if(S.mode==='run'){E.simulate(S,dt);for(const ev of S.events){if(ev.type==='coin'){const projected=R.project(E.LANES[ev.lane],1,5);for(let i=0;i<7;i++){let theta=Math.random()*Math.PI*2;S.particles.push({x:projected.x,y:projected.y-50, vx:Math.cos(theta)*(50+Math.random()*90),vy:Math.sin(theta)*(50+Math.random()*90),life:.5+Math.random()*.24,maxLife:.75})}}if(['coin','power','saved','crash'].includes(ev.type))sound(ev.type==='power'?'power':ev.type);if(ev.type==='saved')toast('SALVO PELA PRANCHA!');if(ev.type==='power')toast(ev.name==='magnet'?'ÍMÃ ATIVADO!':'ESCUDO ATIVADO!');}if(S.mode==='over')endRun();}else S.animTime+=dt*.75;
+R.render(S);hud();requestAnimationFrame(loop)}
+window.__TRACKSHIFT__={state:S,engine:E,start:begin,pause,resume,menu,garage,action,save:()=>stored};menu();requestAnimationFrame(loop);
+})();
