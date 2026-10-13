@@ -1,21 +1,28 @@
-# REA-POU — Build 0.2
+# REA-POU · Build 0.3
 
-Protótipo funcional **Clean Room inspirado no ciclo de cuidados de Pou**, criado com código e desenhos independentes. Não contém recursos extraídos nem código descompilado do APK original.
+**Jogo web mobile original, baseado no ciclo de cuidados de um bichinho virtual.** Reconstrução independente sem arquivos extraídos, áudio, sprites ou código do APK original.
 
-**Jogo online (GitHub Pages):** quando GitHub Pages estiver ativado, abra o endereço de Pages deste repositório. Ou baixe `REA-POU-mobile.html` e abra diretamente no navegador.
+## Jogue
 
-O arquivo `index.html` já é o jogo completo, sem bibliotecas ou dependências de servidor. Mesmo conteúdo disponível em `REA-POU-mobile.html` como versão portátil.
+- **Online:** https://rea-pou.vercel.app/
+- **Offline:** abra o arquivo portátil `REA-POU-mobile-v0.3.html` diretamente no navegador.
+- **Desenvolvimento:** `python3 -m http.server 8000`, depois http://localhost:8000
+- **Testes unitários:** `npm test` (Node.js 22+).
+- **Teste Chromium:** `python3 tests/browser_v03.py` (requer Python, Playwright e Chromium instalados).
 
-## O que está implementado
+## Novidades
 
-- 7 salas: Hall, Cozinha, Laboratório, Sala de Jogos, Quarto, Banheiro e Jardim.
-- Personagem vetorial original, animação de piscar, sono, sujeira, carícias, personalização de pele e chapéus.
-- Alimentação e geladeira, cuidados de higiene, poções e loja.
-- Minijogos jogáveis: Memória, Caça Estrelas e Cor Certa.
-- Progresso, moedas, XP, energia, sono e salvamento local.
+- Mascote redesenhado com silhueta simétrica, olhos ajustados, expressões e bochechas.
+- Boutique com 7 departamentos, 60+ produtos, pré-visualização, estado de compra/equipamento e saldo.
+- 26 minijogos (23 novos), de corrida, skate, espaço, esportes, reflexos, memória, puzzles, culinária, pesca e ritmo.
+- Dificuldade Calmo, Normal, Insano, 26 recordes separados, moedas por partida e bônus na primeira vitória diária.
+- Acessórios de óculos e roupas, mais chapéus, cores e decorações.
+- Progresso compatível com saves anteriores (`rea-pou-v2`) e persistência local no navegador.
 
-## Estado de validação
+## Clean Room
 
-O pacote integral da sandbox passou 8/8 testes Node e um teste de interações Playwright em viewport móvel, sem erros de página. Ainda não foram feitas comparações dinâmicas contra o APK em dispositivo Android, portanto isso não representa paridade funcional completa.
+Os gráficos são feitos por Canvas/CSS (e alguns emojis do sistema), sem imagens extraídas do APK. A comparação de comportamento e fidelidade ao original **não foi concluída** e os minijogos novos são criações originais, não recursos do jogo comercial. O uso de personagens, marcas e semelhanças visuais exige atenção aos direitos aplicáveis antes de distribuição comercial.
 
-O projeto está na etapa de **protótipo 0.2**, não produto final. Próximo marco: análise comportamental do APK em execução, specs de sistemas e reconstrução gradual dos muitos minijogos e customizações restantes.
+## Próximo marco
+
+Testes prolongados em dispositivos Android reais, balanceamento das regras, desempenho em celulares de diferentes faixas, acessibilidade e maior profundidade nos minijogos esportivos e de ação.
