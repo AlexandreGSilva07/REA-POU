@@ -1,37 +1,21 @@
-# REA-POU — reconstrução web mobile (Clean Room)
+# REA-POU — Build 0.2
 
-Projeto de reimplementação independente de um jogo Android para o navegador mobile, baseado em **especificações funcionais e observações verificáveis**, sem reutilização de código, gráficos, áudio ou recursos proprietários do APK.
+Protótipo funcional **Clean Room inspirado no ciclo de cuidados de Pou**, criado com código e desenhos independentes. Não contém recursos extraídos nem código descompilado do APK original.
 
-> **Estado:** infraestrutura inicial. O APK ainda não foi fornecido; nenhuma mecânica específica do jogo original foi analisada ou reproduzida.
+**Jogo online (GitHub Pages):** quando GitHub Pages estiver ativado, abra o endereço de Pages deste repositório. Ou baixe `REA-POU-mobile.html` e abra diretamente no navegador.
 
-## Objetivo
+O arquivo `index.html` já é o jogo completo, sem bibliotecas ou dependências de servidor. Mesmo conteúdo disponível em `REA-POU-mobile.html` como versão portátil.
 
-- Jogo web mobile-first, orientação retrato por padrão e controles touch.
-- Desenvolvimento incremental por especificações pequenas, builds jogáveis e validações contínuas.
-- Separação de acesso: **Agente A** investiga o original e publica apenas especificações comportamentais; **Agente B** implementa código independente; **revisor C** verifica código próprio. A valida o comportamento dos builds, não o código descompilado.
-- GitHub armazena versões e discussões; Supabase coordena filas e resultados. **Não há execução contínua de agentes somente com GitHub + Supabase**: ela exige workers externos.
+## O que está implementado
 
-## Início rápido
+- 7 salas: Hall, Cozinha, Laboratório, Sala de Jogos, Quarto, Banheiro e Jardim.
+- Personagem vetorial original, animação de piscar, sono, sujeira, carícias, personalização de pele e chapéus.
+- Alimentação e geladeira, cuidados de higiene, poções e loja.
+- Minijogos jogáveis: Memória, Caça Estrelas e Cor Certa.
+- Progresso, moedas, XP, energia, sono e salvamento local.
 
-Abra `index.html` por um servidor HTTP estático (por exemplo: `python -m http.server 8000`) e acesse `http://localhost:8000`. O app inicial é apenas uma **cena de teste original** para validar Canvas, layout 9:16 e controles por toque.
+## Estado de validação
 
-```sh
-npm test
-```
+O pacote integral da sandbox passou 8/8 testes Node e um teste de interações Playwright em viewport móvel, sem erros de página. Ainda não foram feitas comparações dinâmicas contra o APK em dispositivo Android, portanto isso não representa paridade funcional completa.
 
-## Estrutura
-
-- `src/` — runtime web independente, sem dependências de terceiros
-- `tests/` — testes do motor de movimento de demonstração
-- `docs/architecture.md` — desenho da solução
-- `docs/clean-room-policy.md` — isolamento entre investigação e desenvolvimento
-- `docs/spec-template.md` — modelo de especificação verificável
-- `supabase/migrations/` — banco de coordenação; não armazena APK
-
-## Segurança e direitos
-
-**Não publique o APK original, dumps, decompilações, chaves, recursos extraídos nem dados pessoais neste repositório público.** Verifique as permissões e os direitos aplicáveis ao jogo antes de distribuir qualquer reconstrução. Os exemplos de interface são genéricos e não representam o jogo alvo.
-
-## Próximo marco
-
-Receber o APK, inventariar seus componentes e emitir a primeira especificação sobre um fluxo observável, então implementá-la e compará-la com o original.
+O projeto está na etapa de **protótipo 0.2**, não produto final. Próximo marco: análise comportamental do APK em execução, specs de sistemas e reconstrução gradual dos muitos minijogos e customizações restantes.
