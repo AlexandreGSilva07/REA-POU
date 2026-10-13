@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { initialState,addXP,feed,buyFood,purchaseCosmetic,usePotion,tick,nextRoom,rewardGame,loadState } from '../src/state.js';
+test('alimentacao consome item e aumenta plenitude',()=>{const s=initialState();assert.equal(feed(s,'apple').ok,true);assert.equal(s.inventory.apple,2);assert.equal(s.fullness,88)});
+test('recusa alimento com fome cheia e fundos insuficientes',()=>{const s=initialState();s.fullness=100;assert.equal(feed(s,'apple').ok,false);s.coins=0;assert.equal(buyFood(s,'burger').ok,false);assert.equal(usePotion(s,'health').ok,false)});
+test('nivel sobe e recompensa com moedas',()=>{const s=initialState();assert.ok(addXP(s,200)>=2);assert.ok(s.coins>300)});
+test('navegacao entre salas retorna ao inicio',()=>{const s=initialState();nextRoom(s,-1);assert.equal(s.room,6);nextRoom(s,1);assert.equal(s.room,0)});
+test('nao permite cosmetic sem saldo',()=>{const s=initialState();s.coins=0;assert.equal(purchaseCosmetic(s,'hat','crown').ok,false);assert.equal(purchaseCosmetic(s,'hat','none').ok,true)});
+test('sono recupera energia',()=>{const s=initialState();s.lightOff=true;s.lastTick=1000;tick(s,5000);assert.equal(s.energy,83)});
+test('limita premiacao de jogo',()=>{const s=initialState();assert.ok(rewardGame(s,5000).coins<=70);assert.ok(s.fun<=100)});
+test('recupera estado default quando save e invalido',()=>{assert.equal(loadState({getItem:()=>'{bad'}).level,1)});
