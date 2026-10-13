@@ -1,0 +1,11 @@
+node_modules/
+*.apk
+*.aab
+*.so
+*.dex
+*.bundle
+*.assets
+.venv/
+__pycache__/
+playwright-report/
+test-results/

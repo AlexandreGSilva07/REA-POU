@@ -1,46 +1,41 @@
-# TRACKSHIFT — City Runner (Clean Room, v0.1)
+# TRACKSHIFT — City Runner
 
-> **Protótipo web independente** do gênero *endless runner de três pistas*, desenvolvido a partir de especificações observáveis. NÃO é uma cópia, distribuição ou port da engine Unity nem utiliza personagens, código, texturas, áudio ou outras mídias extraídas de Subway Surfers. Não é um produto oficial ou afiliado à SYBO.
+**Jogo de corrida infinita mobile para navegador, implementado de forma independente.** Inspirado no gênero popularizado por jogos como Subway Surfers. Não é uma distribuição do Subway Surfers, nem uma execução/port do APK oficial: é um jogo **original** com mecânicas semelhantes e recursos próprios.
 
 ## Jogar
 
-- `index.html` — aplicativo estático modular para hospedagem (Vercel/GitHub Pages).
-- `TRACKSHIFT-offline.html` — a mesma versão em um **único arquivo portátil**, sem conexão nem backend.
-- Abra no browser mobile (modo retrato, 9:18 recomendado), toque **JOGAR AGORA** e deslize.
-- Desktop: setas ou WASD; `Esc` pausa; `B` ativa prancha.
+Abra `TRACKSHIFT-mobile.html` no navegador ou hospede a pasta em servidor estático (`python3 -m http.server 8765`). **Não é necessária conta, biblioteca externa ou Supabase para jogar**. O progresso fica armazenado no navegador em `localStorage` quando disponível.
 
-## O que funciona
+## Funcionalidades da versão 0.1
 
-- Corrida infinita com **3 pistas** e câmera que acompanha as mudanças de faixa.
-- Gestos touch de esquerda/direita, pulo e rolamento; botões acessíveis na tela.
-- Trens 3D estilizados, barreiras, cones, placas suspensas, trilhos, postes, prédios em perspectiva, piso procedural.
-- Física de salto e colisões distintas por obstáculo; proteção consumível por prancha; ímã e escudo ocasionais.
-- Grupos de obstáculos gerados proceduralmente com pelo menos **uma pista sem bloqueios por grupo**.
-- Pontuação, metros, dificuldade que acelera, moedas, recorde e salvamento `localStorage`.
-- Garagem com 5 figurinos originais, pranchas e ímãs compráveis, missões de progresso com recompensas.
-- Jogável offline com interface vertical, efeitos gráficos e sons sintetizados opcionais.
+- Cenário urbano renderizado em Canvas 2D com projeção de perspectiva e trilhos em três faixas (2,5D).
+- Controles por gesto (esquerda/direita/cima/baixo), botões de tela, setas do teclado e WASD.
+- Trens, barricadas, cones e arcos; salto, rolamento e colisões.
+- Pistas e moedas geradas proceduralmente, aumento gradual de velocidade e pontuação.
+- Pranchas protetoras, escudo e imãs; cinco trajes originais.
+- Garagem/loja, missões, recorde, resumo de partida e salvamento local.
+- Áudio sintetizado localmente via Web Audio; pausa e retomada.
 
-## Desenvolvimento
-
-Sem dependência externa, sem ferramentas de build para produção:
+## Testes
 
 ```bash
-python3 -m http.server 8765
-# http://localhost:8765
-node --test tests/engine.test.js
+npm test
+python3 tests/browser_deep.py
 ```
 
-### Código
+A rotina Chromium usa `playwright` e `/usr/bin/chromium` quando presentes. Por restrição da navegação local no navegador de teste, ela injeta os arquivos no contexto de página e utiliza um armazenamento simulado para validar a persistência da lógica. A hospedagem pública precisa de sua própria verificação externa.
 
-- `src/engine.js`: estado, física, gerador de grupos, regras e economia
-- `src/render.js`: projeção própria e pintura de formas geométricas em Canvas 2D
-- `src/main.js`: menus, inputs e integração
-- `src/style.css`: HUD, controles, garagem e menus
-- `tests/`: testes unitários e de Chromium por injeção de conteúdo
-- `docs/RE_FINDINGS.md`: achados verificados no APK e limitações
+## Estrutura
 
-## Limites e próximos passos
+- `index.html` — ponto de entrada web
+- `src/engine.js` — simulação de pistas, saltos, obstáculos, moedas e pontuação
+- `src/render.js` — renderer original em perspectiva no Canvas
+- `src/main.js` — interface, gestos, loja, salvamento e audio
+- `src/style.css` — interface mobile e layouts
+- `tests/` — testes Node e Playwright
+- `docs/APK_INSPECTION.md` — inventário privado e limites da análise
+- `TRACKSHIFT-mobile.html` — arquivo único portátil
 
-A versão atual utiliza **perspectiva 3D renderizada em Canvas 2D**, não WebGL/Three.js nem Unity. A jogabilidade principal funciona, mas ainda falta: reconstrução de referências a partir da execução autorizada do APK Android, modelos mais detalhados, animações e balanço em sessões longas, desafios diários, animações de transições e teste em smartphone real. O APK, os arquivos descompilados e assets originais **não** foram publicados neste repositório.
+## Compromisso de independência
 
-A branch do Pou foi preservada; este jogo vive em `reverse/next-game`. Para ser totalmente Clean Room, análises e implementação devem ser executadas por agentes isolados, recebendo o implementador só contratos funcionais. Não se reivindica isolamento estrito entre pessoas neste protótipo inicial.
+Os arquivos compilados originais, músicas, texturas, personagens e marcas do APK não foram colocados no projeto. Não execute este arquivo como APK Android; a implementação é feita inteiramente para a Web. O trabalho ainda não foi validado por comparação dinâmica completa com o jogo Android original.
