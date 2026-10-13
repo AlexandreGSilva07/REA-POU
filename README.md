@@ -13,7 +13,7 @@
 ## Novidades
 
 - Mascote redesenhado com silhueta simétrica, olhos ajustados, expressões e bochechas.
-- Boutique com 7 departamentos, 60+ produtos, pré-visualização, estado de compra/equipamento e saldo.
+- Boutique com 7 departamentos, 50+ produtos, pré-visualização, estado de compra/equipamento e saldo.
 - 26 minijogos (23 novos), de corrida, skate, espaço, esportes, reflexos, memória, puzzles, culinária, pesca e ritmo.
 - Dificuldade Calmo, Normal, Insano, 26 recordes separados, moedas por partida e bônus na primeira vitória diária.
 - Acessórios de óculos e roupas, mais chapéus, cores e decorações.
